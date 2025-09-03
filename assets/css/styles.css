@@ -1,0 +1,50 @@
+/* Global */
+.form-group{
+	margin: 1em auto;
+}
+
+.listing-card-header{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: .5em 1em;
+}
+
+.listing-card-header button{
+	font-weight: 300;
+}
+
+.property-category-subtext{
+	display: block;
+	font-weight: 200;
+	font-size: .6em;
+}
+
+/* Property detail */
+.property-detail-widgets{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1em 0;
+}
+
+.property-detail-widget{
+	border: 1px solid #eee;
+	padding: 1em;
+	border-radius: .5em;
+	margin: auto .5em;
+	box-shadow: 5px 5px #eee;
+}
+
+.blue-widget{
+	background-color: blue;
+	color: #fff;
+	line-height: .5;
+	border: 1px solid #3c3cf0;;
+}
+
+.units-card{
+	border: 1px solid #eee;
+	border-radius: .5em;
+	padding: 1em 0;
+}

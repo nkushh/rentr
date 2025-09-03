@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Properties{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="listing-card-header">
+					<h5>Properties</h5>
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPropertyModal">
+						<i class="bi bi-plus"></i> Add Property
+					</button>
+				</div>
+				<div class="card-body">
+					<table class="table">
+						<thead>
+							<th>#</th>
+							<th>Name</th>
+							<th>Category</th>
+							<th>Type</th>
+							<th>Date created</th>
+							<th>Status</th>
+							<th class="text-center">Action</th>
+						</thead>
+						<tbody id="dataRow"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addPropertyModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Property Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="addPropertyForm" method="POST">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="propertyName">
+			</div>
+			<div class="form-group">
+				<label>Category</label>
+				<select class="form-control" id="propertyCategory">
+					<option value="" disabled selected>--pick option--</option>
+					{% for property_category in property_categories %}
+					<option value="{{property_category.pk}}">{{property_category.name}}</option>
+					{% empty %}
+					<option value="" disabled>--No options--</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="form-group">
+				<label>Property Type</label>
+				<select class="form-control" id="propertyType">
+					<option value="" disabled selected>--pick option--</option>
+					{% for property_type in property_types %}
+					<option value="{{property_type.pk}}">{{property_type.name}}</option>
+					{% empty %}
+					<option value="" disabled>--No options--</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="form-group">
+				<label>County</label>
+				<input type="text" class="form-control" id="propertyCounty">
+			</div>
+			<div class="form-group">
+				<label>Physical location</label>
+				<input type="text" class="form-control" id="propertyPhysicalLocation">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+	const addPropertyModal = new bootstrap.Modal(document.getElementById('addPropertyModal'));
+	const addPropertyForm = document.getElementById('addPropertyForm');
+	const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+	const dataRow = document.getElementById('dataRow');
+
+	function loadAllProperties() {
+		fetch('/rentals/property-list/', {
+			method: "GET"
+		})
+		.then(response => response.json())
+		.then(properties => {
+			dataRow.innerHTML = '';
+
+			properties.forEach(property => {
+				const row = document.createElement('tr');
+				row.setAttribute('row-data-id', property.id);
+				const propertyUrl = `/rentals/get-property-detail/${property.id}/`
+				
+				row.innerHTML = `
+					<td>${property.id}</td>
+					<td><a href="${propertyUrl}">${property.name}</a></td>
+					<td>${property.property_type_detail.property_category_detail.name}</td>
+					<td>${property.property_type_detail.name}</td>
+					<td>${format_date(property.date_created)}</td>
+					<td><span class="badge ${property.active_status ? "text-bg-success" : "text-bg-danger"}">${property.active_status ? "Active" : "Inactive"}</span></td>
+					<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
+				`;
+				dataRow.appendChild(row);
+			});
+		})
+		.catch(error => console.log(`${error}`));
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		try {
+			loadAllProperties(); // Load tasks on page load
+		} catch {
+			console.log("error.");
+		}
+	});
+
+	addPropertyForm.addEventListener('submit', (event) => {
+		event.preventDefault();
+
+		const property_name = document.getElementById('propertyName').value;
+		const property_type = document.getElementById('propertyType').value;
+		const property_county = document.getElementById('propertyCounty').value;
+		const property_physical_location = document.getElementById('propertyPhysicalLocation').value;
+		
+		fetch('/rentals/property-list/', {
+			method: 'POST',
+			headers: {
+				'Content-Type' : 'Application/json',
+				'X-CSRFToken' : csrfToken
+			},
+			body: JSON.stringify({
+				name : property_name,
+				property_type : property_type,
+				county : property_county,
+				physical_location : property_physical_location
+			})
+		})
+		.then(response => response.json())
+		.then(property => {
+			addPropertyForm.reset();
+			addPropertyModal.hide();
+			
+			const row = document.createElement('tr');
+			row.setAttribute('data-row-id', property.id);
+
+			row.innerHTML = `
+				<td>${property.id}</td>
+				<td>${property.name}</td>
+				<td>${property.property_type_detail.property_category_detail.name}</td>
+				<td>${property.property_type_detail.name}</td>
+				<td>${format_date(property.date_created)}</td>
+				<td><span class="badge ${property.active_status ? "text-bg-success" : "text-bg-danger"}">${property.active_status ? "Active" : "Inactive"}</span></td>
+				<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-fill"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash-fill"></i></a></td>
+			`;
+			dataRow.appendChild(row);
+
+		})
+		.catch(errors => console.log(errors))
+	})
+</script>
+{% endblock %}

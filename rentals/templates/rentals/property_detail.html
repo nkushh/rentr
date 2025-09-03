@@ -1,0 +1,370 @@
+{% extends "base.html"%}
+{% block title %}Property Detail{% endblock %}
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="property-detail-widgets">
+				<div class="col-md-3">
+					<div id="propertyDetailWidget" class="property-detail-widget blue-widget" data-property-id="{{pk}}">
+						<h5 id="propertyName"></h5>
+						<p id="propertyType"></p>
+						<p id="propertyLocation"></p>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="property-detail-widget">
+						<h5 class="widget-title">Total units</h5>
+						<p class="widget-data" id="propertyTotalUnits"></p>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="property-detail-widget">
+						<h5 class="widget-title">Occupied units</h5>
+						<p class="widget-data" id="propertyTotalOccupied"></p>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="property-detail-widget">
+						<h5 class="widget-title">Vacant units</h5>
+						<p class="widget-data" id="propertyTotalVacant"></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-12">
+			<div class="units-card">
+				<div class="listing-card-header">
+					<h5>Property Units</h5>
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPropertyUnitModal">
+						<i class="bi bi-plus"></i> Add Property Unit
+					</button>
+				</div>
+				<table class="table table-sm">
+					<thead>
+						<th>#</th>
+						<th>Name</th>
+						<th>Size</th>
+						<th>Date created</th>
+						<th>Status</th>
+						<th class="text-center">Action</th>
+					</thead>
+					<tbody id="dataRow"></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addPropertyUnitModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Property Unit Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="addPropertyUnitForm" method="POST">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<input type="hidden" id="property">
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="propertyUnitName">
+			</div>
+			<div class="form-group d-none" id="bedroomsField">
+				<label>Bedrooms</label>
+				<input type="number" class="form-control" id="propertyUnitBedrooms">
+			</div>
+			<div class="form-group d-none" id="floorAreaField">
+				<label>Floor area</label>
+				<input type="number" class="form-control" id="propertyUnitFloorArea">
+			</div>
+			<div class="form-group">
+				<label>Price</label>
+				<input type="text" class="form-control" id="propertyUnitPrice">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="updatePropertyUnitModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Property Unit Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="updatePropertyUnitForm" method="POST">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<input type="hidden" id="propertyUnitID">
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="propertyUnitNameUpdate">
+			</div>
+			<div class="form-group d-none" id="bedroomsFieldUpdate">
+				<label>Bedrooms</label>
+				<input type="number" class="form-control" id="propertyUnitBedroomsUpdate">
+			</div>
+			<div class="form-group d-none" id="floorAreaFieldUpdate">
+				<label>Floor area</label>
+				<input type="number" class="form-control" id="propertyUnitFloorAreaUpdate">
+			</div>
+			<div class="form-group">
+				<label>Price</label>
+				<input type="text" class="form-control" id="propertyUnitPriceUpdate">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+	// Data widgets
+	const propertyName = document.getElementById('propertyName');
+	const propertyType = document.getElementById('propertyType');
+	const propertyLocation = document.getElementById('propertyLocation');
+	const propertyTotalUnits = document.getElementById('propertyTotalUnits');
+	const propertyTotalOccupied = document.getElementById('propertyTotalOccupied');
+	const propertyTotalVacant = document.getElementById('propertyTotalVacant');
+	// Form elements
+	const addPropertyUnitModal = new bootstrap.Modal(document.getElementById('addPropertyUnitModal'));
+	const addPropertyUnitForm = document.getElementById('addPropertyUnitForm');
+	const updatePropertyUnitModal = new bootstrap.Modal(document.getElementById('updatePropertyUnitModal'));
+	const updatePropertyUnitForm = document.getElementById('updatePropertyUnitForm');
+	const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+	const propertyID = document.getElementById('propertyDetailWidget');
+	const dataRow = document.getElementById('dataRow');
+	let propertyCategory = '';
+
+	function toggle_property_optional_fields(property_type){
+		const property_bedrooms = document.getElementById('bedroomsField');
+		const property_floor_area = document.getElementById('floorAreaField');
+		const property_bedrooms_update = document.getElementById('bedroomsFieldUpdate');
+		const property_floor_area_update = document.getElementById('floorAreaFieldUpdate');
+
+		property_bedrooms.classList.add('d-none');
+    	property_floor_area.classList.add('d-none');
+		property_bedrooms_update.classList.add('d-none')
+		property_floor_area_update.classList.add('d-none')
+		
+		if(property_type === "RESIDENTIAL"){
+			property_bedrooms.classList.remove('d-none');
+			property_bedrooms_update.classList.remove('d-none');
+		}else{
+			property_floor_area.classList.remove('d-none');
+			property_floor_area_update.classList.remove('d-none');
+		}
+	}
+
+	function loadPropertyDetail(property_pk) {
+		fetch(`/rentals/property-detail/${property_pk}/`, {
+			method: "GET"
+		})
+		.then(response => response.json())
+		.then(data => {
+			propertyCategory = data.property_details.property_type_detail.property_category_detail.name;
+			toggle_property_optional_fields(propertyCategory);
+
+			const property_detail = data.property_details;
+			propertyName.textContent = property_detail.name;
+			propertyType.textContent = property_detail.property_type_detail.name
+			propertyLocation.textContent = `LOCATION: ${property_detail.physical_location} - ${property_detail.county}`
+
+			const property_aggregates = data.property_aggregate;
+        	propertyTotalUnits.textContent = property_aggregates.total_units;
+        	propertyTotalOccupied.textContent = property_aggregates.total_occupied;
+        	propertyTotalVacant.textContent = property_aggregates.total_vacant;
+
+			dataRow.innerHTML = '';
+
+			const unitList = data.units;
+			
+			unitList.forEach(property_unit => {
+				const row = document.createElement('tr');
+				row.setAttribute('row-data-id', property_unit.id);
+				
+				row.innerHTML = `
+					<td>${property_unit.id}</td>
+					<td>${property_unit.name}</td>
+					<td>${property_unit.bedrooms ? `${property_unit.bedrooms} bedrooms` : `${property_unit.floor_area} square meters`}</td>
+					<td>${format_date(property_unit.date_created)}</td>
+					<td><span class="badge ${property_unit.vacant_status ? "text-bg-success" : "text-bg-danger"}">${property_unit.vacant_status ? "Vacant" : "Occupied"}</span></td>
+					<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
+				`;
+				dataRow.appendChild(row);
+			});
+		})
+		.catch(error => console.log(`${error}`));
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		try {
+			const property_id = propertyID.getAttribute('data-property-id');
+			loadPropertyDetail(property_id)
+		} catch {
+			console.log("error.");
+		}
+	});
+
+	addPropertyUnitForm.addEventListener('submit', (event) => {
+		event.preventDefault();
+
+		const property_unit_name = document.getElementById('propertyUnitName').value;
+		const property_unit_bedrooms = document.getElementById('propertyUnitBedrooms').value
+		const property_unit_floor_area = document.getElementById('propertyUnitFloorArea').value
+		const property_rent_amount = document.getElementById('propertyUnitPrice').value;
+ 		
+		fetch('/rentals/property-units/', {
+			method: 'POST',
+			headers: {
+				'Content-Type' : 'Application/json',
+				'X-CSRFToken' : csrfToken
+			},
+			body: JSON.stringify({
+				property : propertyID.getAttribute('data-property-id'),
+				name : property_unit_name,
+				rent_amount : property_rent_amount,
+				floor_area : property_unit_floor_area,
+				bedrooms : property_unit_bedrooms
+			})
+		})
+		.then(response => response.json())
+		.then(property_unit => {
+			addPropertyUnitForm.reset();
+			addPropertyUnitModal.hide();
+
+			let currentTotal = parseInt(propertyTotalUnits.textContent);
+			let vacantUnitsTotal = parseInt(propertyTotalVacant.textContent);
+        	propertyTotalUnits.textContent = currentTotal + 1;
+			propertyTotalVacant.textContent = vacantUnitsTotal + 1;
+			
+			const row = document.createElement('tr');
+			row.setAttribute('data-row-id', property_unit.id);
+
+			row.innerHTML = `
+				<td>${property_unit.id}</td>
+				<td>${property_unit.name}</td>
+				<td>${property_unit.bedrooms ? `${property_unit.bedrooms} bedrooms` : `${property_unit.floor_area} square meters`}</td>
+				<td>${format_date(property_unit.date_created)}</td>
+				<td><span class="badge ${property_unit.vacant_status ? "text-bg-success" : "text-bg-danger"}">${property_unit.vacant_status ? "Vacant" : "Occupied"}</span></td>
+				<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
+			`;
+			dataRow.appendChild(row);
+
+		})
+		.catch(errors => console.log(errors))
+	})
+
+	document.addEventListener('click', (event) => {
+		if(event.target.closest('.edit-btn')){
+			event.preventDefault();
+
+			const row = event.target.closest('tr');
+			const rowID = row.getAttribute('row-data-id');
+
+			fetch(`/rentals/property-unit-detail/${rowID}/`, {
+				method: "GET",
+				headers: {
+					'Content-Type' : 'Application/json'
+				}
+			})
+			.then(response => response.json())
+			.then(data => {
+				updatePropertyUnitModal.show();
+				document.getElementById('propertyUnitID').value = data.id;
+				document.getElementById('propertyUnitNameUpdate').value = data.name;
+				document.getElementById('propertyUnitBedroomsUpdate').value = data.bedrooms;
+				document.getElementById('propertyUnitFloorAreaUpdate').value = data.floor_area;
+				document.getElementById('propertyUnitPriceUpdate').value = data.rent_amount;
+			})
+		}
+	})
+
+	updatePropertyUnitForm.addEventListener('submit', (event) => {
+		const property_unit_id = document.getElementById('propertyUnitID').value;
+		const property_unit_name = document.getElementById('propertyUnitNameUpdate').value;
+		const property_unit_bedrooms = document.getElementById('propertyUnitBedroomsUpdate').value
+		const property_unit_floor_area = document.getElementById('propertyUnitFloorAreaUpdate').value
+		const property_rent_amount = document.getElementById('propertyUnitPriceUpdate').value;
+		
+
+		const row = document.querySelector(`tr[row-data-id="${property_unit_id}"]`);
+
+		fetch(`/rentals/property-unit-detail/${property_unit_id}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type' : 'Application/json',
+				'X-CSRFToken': csrfToken
+			},
+			body: JSON.stringify({
+				name: property_unit_name,
+				rent_amount: property_rent_amount,
+				floor_area: property_unit_floor_area,
+				bedrooms: property_unit_bedrooms
+			})
+		})
+		.then(response => response.json())
+		.then(property_unit => {
+			const row_cells = row.cells;
+			row_cells[0].textContent = property_unit.id;
+			row_cells[1].textContent = property_unit.name;
+			row_cells[2].textContent = property_unit.bedrooms ? property_unit.bedrooms : property_unit.floor_area;
+			row_cells[3].textContent = format_date(property_unit.date_created);
+			row_cells[4].textContent = property_unit.vacant_status ? "Vacant" : "Occupied";
+
+			updatePropertyUnitForm.reset();
+			updatePropertyUnitModal.hide();
+		})
+		.catch(error => console.log(error))
+	})
+
+	document.addEventListener('click', (event) => {
+		if(event.target.closest('.delete-btn')){
+			event.preventDefault();
+
+			const tableRow = event.target.closest('tr');
+			const rowID = tableRow.getAttribute('row-data-id');
+			console.log(`ID: ${rowID}`)
+
+			fetch(`/rentals/property-unit-detail/${rowID}/`, {
+				method: 'DELETE',
+				headers: {
+					'X-CSRFToken': csrfToken
+				}
+			})
+			.then(response => {
+				if(response.ok){
+					let currentTotal = parseInt(propertyTotalUnits.textContent);
+					let vacantUnitsTotal = parseInt(propertyTotalVacant.textContent);
+					propertyTotalUnits.textContent = currentTotal + 1;
+					propertyTotalVacant.textContent = vacantUnitsTotal + 1;
+					
+					tableRow.remove();
+				}else{
+					console.log('Error removing item');
+				}
+			})
+			.catch(error => console.log(error))
+		}
+		
+	})
+
+</script>
+{% endblock %}

@@ -1,0 +1,236 @@
+{% extends "base.html"%}
+{% block title %}Property Categories{% endblock %}
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="listing-card-header">
+					<h5>Property Categories</h5>
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPropertyCategoryModal">
+						<i class="bi bi-plus"></i> Add Property Category
+					</button>
+				</div>
+				<div class="card-body">
+					<table class="table table-sm">
+						<thead>
+							<th>#</th>
+							<th>Name</th>
+							<th>Date created</th>
+							<th>Status</th>
+							<th>Action</th>
+						</thead>
+						<tbody id="dataRow"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modals -->
+ <div class="modal fade" id="addPropertyCategoryModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Propert Category Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="addPropertyCategoryForm" method="POST">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="propertyCategoryName">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="updatePropertyCategoryModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Propert Category Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="updatePropertyCategoryForm" method="POST">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<input type="hidden" id="propertyCategoryID">
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="propertyCategoryNameUpdate">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+	const addPropertyCategoryModal = new bootstrap.Modal(document.getElementById('addPropertyCategoryModal'));
+	const addPropertyCategoryForm = document.getElementById('addPropertyCategoryForm');
+	const updatePropertyCategoryModal = new bootstrap.Modal(document.getElementById('updatePropertyCategoryModal'));
+	const updatePropertyCategoryForm = document.getElementById('updatePropertyCategoryForm');
+	const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+	const dataRow = document.getElementById('dataRow');
+
+	function loadAllPropertyCategories() {
+		fetch('/rentals/property-category/', {
+			method: "GET"
+		})
+		.then(response => response.json())
+		.then(property_categories => {
+			dataRow.innerHTML = '';
+
+			property_categories.forEach(property_category => {
+				const row = document.createElement('tr');
+				row.setAttribute('row-data-id', property_category.id);
+				
+				row.innerHTML = `
+					<td>${property_category.id}</td>
+					<td>${property_category.name}</td>
+					<td>${format_date(property_category.date_created)}</td>
+					<td><span class="badge ${property_category.active_status ? "text-bg-success" : "text-bg-danger"}">${property_category.active_status ? "Active" : "Inactive"}</span></td>
+					<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
+				`;
+				dataRow.appendChild(row);
+			});
+		})
+		.catch(error => console.log(`${error}`));
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		try {
+			loadAllPropertyCategories(); // Load tasks on page load
+		} catch {
+			console.log("error.");
+		}
+	});
+
+	addPropertyCategoryForm.addEventListener('submit', (event) => {
+		event.preventDefault();
+
+		const property_category_name = document.getElementById('propertyCategoryName').value;
+		
+		fetch('/rentals/property-category/', {
+			method: 'POST',
+			headers: {
+				'Content-Type' : 'Application/json',
+				'X-CSRFToken' : csrfToken
+			},
+			body: JSON.stringify({
+				name : property_category_name
+			})
+		})
+		.then(response => response.json())
+		.then(property_category => {
+			addPropertyCategoryForm.reset();
+			addPropertyCategoryModal.hide();
+			
+			const row = document.createElement('tr');
+			row.setAttribute('data-row-id', property_category.id);
+
+			row.innerHTML = `
+				<td>${property_category.id}</td>
+				<td>${property_category.name}</td>
+				<td>${format_date(property_category.date_created)}</td>
+				<td><span class="badge ${property_category.active_status ? "text-bg-success" : "text-bg-danger"}">${property_category.active_status ? "Active" : "Inactive"}</span></td>
+				<td><a href="#" class="edit-btn"><i class="bi bi-pencil-fill"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash-fill"></i></a></td>
+			`;
+			dataRow.appendChild(row);
+
+		})
+		.catch(errors => console.log(errors))
+	})
+
+	document.addEventListener('click', (event) => {
+		if(event.target.closest('.edit-btn')){
+			event.preventDefault();
+
+			const row = event.target.closest('tr');
+			const rowID = row.getAttribute('row-data-id');
+
+			fetch(`/rentals/property-category-detail/${rowID}/`, {
+				method: "GET",
+				headers: {
+					'Content-Type' : 'Application/json'
+				}
+			})
+			.then(response => response.json())
+			.then(data => {
+				updatePropertyCategoryModal.show();
+				let id_field = document.getElementById('propertyCategoryID').value = data.id;
+				let input_field = document.getElementById('propertyCategoryNameUpdate').value = data.name;
+			})
+		}
+	})
+
+	updatePropertyCategoryForm.addEventListener('submit', (event) => {
+		const propertyCategoryID = document.getElementById('propertyCategoryID').value
+		const propertyCategoryName = document.getElementById('propertyCategoryNameUpdate').value
+
+		const row = document.querySelector(`tr[row-data-id="${propertyCategoryID}"]`);
+
+		fetch(`/rentals/property-category-detail/${propertyCategoryID}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type' : 'Application/json'
+			},
+			body: JSON.stringify({
+				name: propertyCategoryName
+			})
+		})
+		.then(response => response.json())
+		.then(property_category => {
+			const row_cells = row.cells;
+			row_cells[0].textContent = data.id;
+			row_cells[0].textContent = data.name;
+			row_cells[1].textContent = format_date(data.date_created);
+			row_cells[2].textContent = data.active_status ? "Active" : "Inactive";
+
+			updatePropertyCategoryForm.reset();
+			updatePropertyCategoryModal.hide();
+		})
+		.catch(error => console.log(error))
+	})
+
+	document.addEventListener('click', (event) => {
+		if(event.target.closest('.delete-btn')){
+			event.preventDefault();
+
+			const tableRow = event.target.closest('tr');
+			const rowID = tableRow.getAttribute('row-data-id');
+			console.log(`ID: ${rowID}`)
+
+			fetch(`/rentals/property-category-detail/${rowID}/`, {
+				method: 'DELETE',
+				headers: {
+					'X-CSRFToken': csrfToken
+				}
+			})
+			.then(response => {
+				if(response.ok){
+					tableRow.remove();
+				}else{
+					console.log('Error removing item');
+				}
+			})
+			.catch(error => console.log(error))
+		}
+		
+	})
+</script>
+{% endblock %}

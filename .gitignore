@@ -1,0 +1,6 @@
+.python-version
+db.sqlite3
+__pycacache__/
+.DS_Store
+*.pyc
+venv/
