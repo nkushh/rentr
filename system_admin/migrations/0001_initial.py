@@ -9,74 +9,57 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('system_admin', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Tenant',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date_created', models.DateTimeField(auto_now_add=True)),
-                ('last_updated', models.DateTimeField(auto_now=True)),
-                ('active_status', models.BooleanField(default=True)),
-                ('tenant_type', models.CharField(max_length=255)),
-                ('name', models.CharField(max_length=255)),
-                ('gender', models.CharField(blank=True, max_length=255, null=True)),
-                ('id_no', models.CharField(max_length=255)),
-                ('phone_no', models.CharField(max_length=255)),
-                ('email', models.CharField(blank=True, max_length=255, null=True)),
-                ('occupation', models.CharField(blank=True, max_length=255, null=True)),
-            ],
-            options={
-                'abstract': False,
-            },
-        ),
-        migrations.CreateModel(
-            name='Property',
+            name='PropertyCategory',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('last_updated', models.DateTimeField(auto_now=True)),
                 ('active_status', models.BooleanField(default=True)),
                 ('name', models.CharField(max_length=255)),
-                ('county', models.CharField(max_length=255)),
-                ('physical_location', models.CharField(max_length=255)),
-                ('property_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='system_admin.propertytype')),
             ],
             options={
                 'abstract': False,
             },
         ),
         migrations.CreateModel(
-            name='PropertyUnit',
+            name='PropertyDepositCategory',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('last_updated', models.DateTimeField(auto_now=True)),
                 ('active_status', models.BooleanField(default=True)),
                 ('name', models.CharField(max_length=255)),
-                ('rent_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True)),
-                ('floor_area', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('bedrooms', models.PositiveIntegerField(blank=True, null=True)),
-                ('vacant_status', models.BooleanField(default=True)),
-                ('property', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='rentals.property')),
             ],
             options={
                 'abstract': False,
             },
         ),
         migrations.CreateModel(
-            name='PropertyLease',
+            name='PropertyReccurentPayment',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('last_updated', models.DateTimeField(auto_now=True)),
                 ('active_status', models.BooleanField(default=True)),
-                ('start_date', models.DateField(blank=True, null=True)),
-                ('end_date', models.DateField(blank=True, null=True)),
-                ('property_unit', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='rentals.propertyunit')),
-                ('tenant', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='rentals.tenant')),
+                ('name', models.CharField(max_length=255)),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='PropertyType',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('date_created', models.DateTimeField(auto_now_add=True)),
+                ('last_updated', models.DateTimeField(auto_now=True)),
+                ('active_status', models.BooleanField(default=True)),
+                ('name', models.CharField(max_length=255)),
+                ('property_category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='system_admin.propertycategory')),
             ],
             options={
                 'abstract': False,

@@ -5,41 +5,16 @@ from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 # Models
 from . import models as rental_models
+from system_admin import models as admin_models
 # Serializers
 from . import serializers as rental_serializers
 
 # Create your views here.
-def property_categories(request):
-	return render(request, 'rentals/property_categories.html')
-
-class ListCreatePropertyCategory(ListCreateAPIView):
-	queryset = rental_models.PropertyCategory.objects.order_by('name')
-	serializer_class = rental_serializers.PropertyCategorySerializer
-
-class PropertyCategoryDetail(RetrieveUpdateDestroyAPIView):
-	queryset = rental_models.PropertyCategory.objects.order_by('name')
-	serializer_class = rental_serializers.PropertyCategorySerializer
-	lookup_field = 'pk'
-
-def property_types(request):
-	property_categories = rental_models.PropertyCategory.objects.order_by('name')
-	context = {
-		'property_categories' : property_categories
-	}
-	return render(request, 'rentals/property_types.html', context)
-
-class ListCreatePropertyType(ListCreateAPIView):
-    queryset = rental_models.PropertyType.objects.select_related('property_category').order_by('name')
-    serializer_class = rental_serializers.PropertyTypeSerializer
-    
-class PropertyTypeDetail(RetrieveUpdateDestroyAPIView):
-	queryset = rental_models.PropertyType.objects.select_related('property_category').order_by('name')
-	serializer_class = rental_serializers.PropertyTypeSerializer
-	lookup_field = 'pk'
-
 def properties(request):
-	property_types = rental_models.PropertyType.objects.order_by('name')
+	property_categories = admin_models.PropertyCategory.objects.order_by('name')
+	property_types = admin_models.PropertyType.objects.order_by('name')
 	context = {
+		'property_categories' : property_categories,
 		'property_types' : property_types
 	}
 	return render(request, 'rentals/properties.html', context)

@@ -108,7 +108,7 @@
 	const dataRow = document.getElementById('dataRow');
 
 	function loadAllPropertyTypes() {
-		fetch('/rentals/property-type/', {
+		fetch('/system-admin/property-type/', {
 			method: "GET"
 		})
 		.then(response => response.json())
@@ -147,7 +147,7 @@
 		const property_type_name = document.getElementById('propertyTypeName').value;
 		const property_category = document.getElementById('propertyCategory').value;
  		
-		fetch('/rentals/property-type/', {
+		fetch('/system-admin/property-type/', {
 			method: 'POST',
 			headers: {
 				'Content-Type' : 'Application/json',
@@ -164,7 +164,7 @@
 			addPropertyTypeModal.hide();
 			
 			const row = document.createElement('tr');
-			row.setAttribute('data-row-id', property_type.id);
+			row.setAttribute('row-data-id', property_type.id);
 
 			row.innerHTML = `
 				<td>${property_type.id}</td>
@@ -187,7 +187,7 @@
 			const row = event.target.closest('tr');
 			const rowID = row.getAttribute('row-data-id');
 
-			fetch(`/rentals/property-type-detail/${rowID}/`, {
+			fetch(`/system-admin/property-type-detail/${rowID}/`, {
 				method: "GET",
 				headers: {
 					'Content-Type' : 'Application/json'
@@ -211,7 +211,7 @@
 
 		const row = document.querySelector(`tr[row-data-id="${propertyTypeID}"]`);
 
-		fetch(`/rentals/property-type-detail/${propertyTypeID}/`, {
+		fetch(`/system-admin/property-type-detail/${propertyTypeID}/`, {
 			method: 'PATCH',
 			headers: {
 				'Content-Type' : 'Application/json',
@@ -244,7 +244,7 @@
 			const tableRow = event.target.closest('tr');
 			const rowID = tableRow.getAttribute('row-data-id');
 
-			fetch(`/rentals/property-type-detail/${rowID}/`, {
+			fetch(`/system-admin/property-type-detail/${rowID}/`, {
 				method: 'DELETE',
 				headers: {
 					'X-CSRFToken': csrfToken

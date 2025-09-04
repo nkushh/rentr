@@ -1,23 +1,10 @@
 from django.db import models
 from system_admin.models import BaseModel
 
-# Create your models here.
-class PropertyCategory(BaseModel):
-	name = models.CharField(max_length=255)
-
-	def __str__(self):
-		return self.name
-
-class PropertyType(BaseModel):
-	name = models.CharField(max_length=255)
-	property_category = models.ForeignKey(PropertyCategory, null=True, on_delete=models.SET_NULL)
-
-	def __str__(self):
-		return self.name
-	
+# Create your models here.	
 class Property(BaseModel):
 	name = models.CharField(max_length=255)
-	property_type = models.ForeignKey(PropertyType, null=True, on_delete=models.SET_NULL)
+	property_type = models.ForeignKey('system_admin.PropertyType', null=True, on_delete=models.SET_NULL)
 	county = models.CharField(max_length=255)
 	physical_location = models.CharField(max_length=255)
 

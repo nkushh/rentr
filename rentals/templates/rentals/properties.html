@@ -158,11 +158,13 @@
 			addPropertyModal.hide();
 			
 			const row = document.createElement('tr');
-			row.setAttribute('data-row-id', property.id);
+			row.setAttribute('row-data-id', property.id);
+
+			const propertyUrl = `/rentals/get-property-detail/${property.id}/`
 
 			row.innerHTML = `
 				<td>${property.id}</td>
-				<td>${property.name}</td>
+				<td><a href="${propertyUrl}">${property.name}</a></td>
 				<td>${property.property_type_detail.property_category_detail.name}</td>
 				<td>${property.property_type_detail.name}</td>
 				<td>${format_date(property.date_created)}</td>

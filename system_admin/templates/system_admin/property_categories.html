@@ -18,7 +18,7 @@
 							<th>Name</th>
 							<th>Date created</th>
 							<th>Status</th>
-							<th>Action</th>
+							<th class="text-center">Action</th>
 						</thead>
 						<tbody id="dataRow"></tbody>
 					</table>
@@ -88,7 +88,7 @@
 	const dataRow = document.getElementById('dataRow');
 
 	function loadAllPropertyCategories() {
-		fetch('/rentals/property-category/', {
+		fetch('/system-admin/property-category/', {
 			method: "GET"
 		})
 		.then(response => response.json())
@@ -125,7 +125,7 @@
 
 		const property_category_name = document.getElementById('propertyCategoryName').value;
 		
-		fetch('/rentals/property-category/', {
+		fetch('/system-admin/property-category/', {
 			method: 'POST',
 			headers: {
 				'Content-Type' : 'Application/json',
@@ -141,14 +141,14 @@
 			addPropertyCategoryModal.hide();
 			
 			const row = document.createElement('tr');
-			row.setAttribute('data-row-id', property_category.id);
+			row.setAttribute('row-data-id', property_category.id);
 
 			row.innerHTML = `
 				<td>${property_category.id}</td>
 				<td>${property_category.name}</td>
 				<td>${format_date(property_category.date_created)}</td>
 				<td><span class="badge ${property_category.active_status ? "text-bg-success" : "text-bg-danger"}">${property_category.active_status ? "Active" : "Inactive"}</span></td>
-				<td><a href="#" class="edit-btn"><i class="bi bi-pencil-fill"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash-fill"></i></a></td>
+				<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
 			`;
 			dataRow.appendChild(row);
 
@@ -163,7 +163,7 @@
 			const row = event.target.closest('tr');
 			const rowID = row.getAttribute('row-data-id');
 
-			fetch(`/rentals/property-category-detail/${rowID}/`, {
+			fetch(`/system-admin/property-category-detail/${rowID}/`, {
 				method: "GET",
 				headers: {
 					'Content-Type' : 'Application/json'
@@ -184,7 +184,7 @@
 
 		const row = document.querySelector(`tr[row-data-id="${propertyCategoryID}"]`);
 
-		fetch(`/rentals/property-category-detail/${propertyCategoryID}/`, {
+		fetch(`/system-admin/property-category-detail/${propertyCategoryID}/`, {
 			method: 'PATCH',
 			headers: {
 				'Content-Type' : 'Application/json'
@@ -215,7 +215,7 @@
 			const rowID = tableRow.getAttribute('row-data-id');
 			console.log(`ID: ${rowID}`)
 
-			fetch(`/rentals/property-category-detail/${rowID}/`, {
+			fetch(`/system-admin/property-category-detail/${rowID}/`, {
 				method: 'DELETE',
 				headers: {
 					'X-CSRFToken': csrfToken
