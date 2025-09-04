@@ -135,7 +135,7 @@
 
 	document.addEventListener('DOMContentLoaded', () => {
 		try {
-			loadAllPropertyTypes(); // Load tasks on page load
+			loadAllPropertyTypes();
 		} catch {
 			console.log("error.");
 		}
@@ -243,7 +243,6 @@
 
 			const tableRow = event.target.closest('tr');
 			const rowID = tableRow.getAttribute('row-data-id');
-			console.log(`ID: ${rowID}`)
 
 			fetch(`/rentals/property-type-detail/${rowID}/`, {
 				method: 'DELETE',

@@ -31,3 +31,29 @@ class PropertyUnit(BaseModel):
 	floor_area = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 	bedrooms = models.PositiveIntegerField(null=True, blank=True)
 	vacant_status = models.BooleanField(default=True)
+
+	def __str__(self):
+		return f"{self.name} - {self.property.name}"
+	
+class Tenant(BaseModel):
+	tenant_type = models.CharField(max_length=255)
+	name = models.CharField(max_length=255)
+	gender = models.CharField(max_length=255, null=True, blank=True)
+	id_no = models.CharField(max_length=255)
+	phone_no = models.CharField(max_length=255)
+	email = models.CharField(max_length=255, null=True, blank=True)
+	occupation = models.CharField(max_length=255, null=True, blank=True)
+
+	def __str__(self):
+		return f"{self.name} - {self.id_no}"
+	
+class PropertyLease(BaseModel):
+	property_unit = models.ForeignKey(PropertyUnit, null=True, on_delete=models.SET_NULL)
+	tenant = models.ForeignKey(Tenant, null=True, on_delete=models.SET_NULL)
+	start_date = models.DateField(null=True, blank=True)
+	end_date = models.DateField(null=True, blank=True)
+
+	def __str__(self):
+		return f"{self.tenant.name} - {self.property_unit.name} - {self.property_unit.property.name}"
+
+

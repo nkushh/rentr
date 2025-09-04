@@ -89,3 +89,15 @@ class PropertyUnitDetail(RetrieveUpdateDestroyAPIView):
 	queryset = rental_models.PropertyUnit.objects.order_by('name')
 	serializer_class = rental_serializers.PropertyUnitSerializer
 	lookup_field = 'pk'
+
+def get_tenants(request):
+	return render(request, 'rentals/tenants.html')
+
+class ListCreateTenants(ListCreateAPIView):
+	queryset = rental_models.Tenant.objects.order_by('name')
+	serializer_class = rental_serializers.TenantsSerializer
+
+class TenantDetail(RetrieveUpdateDestroyAPIView):
+	queryset = rental_models.Tenant.objects.order_by('name')
+	serializer_class = rental_serializers.TenantsSerializer
+	lookup_field = 'pk'

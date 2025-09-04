@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Tenants{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="listing-card-header">
+					<h5>Tenants</h5>
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTenantModal">
+						<i class="bi bi-plus"></i> Add Tenant
+					</button>
+				</div>
+				<div class="card-body">
+					<table class="table">
+						<thead>
+							<th>#</th>
+							<th>Name</th>
+							<th>Category</th>
+							<th>Phone No.</th>
+							<th>Date created</th>
+							<th>Status</th>
+							<th class="text-center">Action</th>
+						</thead>
+						<tbody id="dataRow"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addTenantModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Tenant Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="addTenantForm">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<div class="form-group">
+				<label>Tenant Type</label>
+				<select class="form-control" id="tenantType">
+					<option value="" selected disabled>--Pick option--</option>
+					<option value="Individual">Individual</option>
+					<option value="Business">Business</option>
+					<option value="Group">Group</option>
+					<option value="Other">Other</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="tenantName">
+			</div>
+			<div class="form-group">
+				<label>ID/Passport</label>
+				<input type="text" class="form-control" id="tenantIdNumber">
+			</div>
+			<div class="form-group">
+				<label>Phone Number</label>
+				<input type="text" class="form-control" id="tenantPhoneNumber">
+			</div>
+			<div class="form-group">
+				<label>Email</label>
+				<input type="email" class="form-control" id="tenantEmail">
+			</div>
+			<div class="form-group">
+				<label>Occupation</label>
+				<input type="text" class="form-control" id="tenantOccupation">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="updateTenantModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Tenant Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="updateTenantForm">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<input type="hidden" id="tenantID">
+			<div class="form-group">
+				<label>Tenant Type</label>
+				<select class="form-control" id="updateTenantType">
+					<option value="Individual" {% if object.tenant_type == "Individual" %}selected{% endif %}>Individual</option>
+					<option value="Business" {% if object.tenant_type == "Business" %}selected{% endif %}>Business</option>
+					<option value="Group" {% if object.tenant_type == "Group" %}selected{% endif %}>Group</option>
+					<option value="Other" {% if object.tenant_type == "Other" %}selected{% endif %}>Other</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="updateTenantName">
+			</div>
+			<div class="form-group">
+				<label>ID/Passport</label>
+				<input type="text" class="form-control" id="updateTenantIdNumber">
+			</div>
+			<div class="form-group">
+				<label>Phone Number</label>
+				<input type="text" class="form-control" id="updateTenantPhoneNumber">
+			</div>
+			<div class="form-group">
+				<label>Email</label>
+				<input type="email" class="form-control" id="updateTenantEmail">
+			</div>
+			<div class="form-group">
+				<label>Occupation</label>
+				<input type="text" class="form-control" id="updateTenantOccupation">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+	// modals
+	const addTenantModal = new bootstrap.Modal(document.getElementById('addTenantModal'));
+	const updateTenantModal = new bootstrap.Modal(document.getElementById('updateTenantModal'));
+	// forms
+	const addTenantForm = document.getElementById('addTenantForm');
+	const updateTenantForm = document.getElementById('updateTenantForm');
+	const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+	// Table data
+	const dataRow = document.getElementById('dataRow');
+
+	function loadAllTenants(){
+		fetch('/rentals/tenants/', {
+			method: "GET",
+			headers: {
+				'Content-Type' : 'Application/json'
+			}
+		})
+		.then(response => response.json())
+		.then(tenants => {
+			dataRow.innerHTML = ''
+			
+			tenants.forEach(tenant => {
+				const row = document.createElement('tr');
+				row.setAttribute('row-data-id', tenant.id);
+
+				row.innerHTML = `
+					<td>${tenant.id}</td>
+					<td>${tenant.name}</td>
+					<td>${tenant.tenant_type}</td>
+					<td>${tenant.phone_no}</td>
+					<td>${format_date(tenant.date_created)}</td>
+					<td><span class="badge ${tenant.active_status ? "text-bg-success" : "text-bg-danger"}">${tenant.active_status ? "Active" : "Inactive"}</span></td>
+					<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
+				`
+				dataRow.appendChild(row);
+			})
+		})
+		.catch(errors => console.log(errors))
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		try{
+			loadAllTenants();
+		}catch{
+			console.log("error.");
+		}
+	})
+
+	addTenantForm.addEventListener('submit', (event) => {
+		event.preventDefault();
+
+		const tenantType = document.getElementById('tenantType').value;
+		const tenantName = document.getElementById('tenantName').value;
+		const tenantIdNumber = document.getElementById('tenantIdNumber').value;
+		const tenantPhoneNumber = document.getElementById('tenantPhoneNumber').value;
+		const tenantEmail = document.getElementById('tenantEmail').value;
+		const tenantOccupation = document.getElementById('tenantOccupation').value;
+
+		fetch('/rentals/tenants/', {
+			method: "POST",
+			headers: {
+				'Content-Type' : 'Application/json',
+				'X-CSRFToken' : csrfToken
+			},
+			body: JSON.stringify({
+				tenant_type : tenantType,
+				name : tenantName,
+				id_no : tenantIdNumber,
+				phone_no : tenantPhoneNumber,
+				email : tenantEmail,
+				occupation : tenantOccupation
+			})
+		})
+		.then(response => response.json())
+		.then(tenant => {
+			addTenantForm.reset();
+			addTenantModal.hide();
+
+			const row = document.createElement('tr');
+			row.setAttribute('row-data-id', tenant.id);
+
+			row.innerHTML = `
+				<td>${tenant.id}</td>
+				<td>${tenant.name}</td>
+				<td>${tenant.tenant_type}</td>
+				<td>${tenant.phone_no}</td>
+				<td>${format_date(tenant.date_created)}</td>
+				<td><span class="badge ${tenant.active_status ? "text-bg-success" : "text-bg-danger"}">${tenant.active_status ? "Active" : "Inactive"}</span></td>
+				<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
+			`
+			dataRow.appendChild(row)
+		})
+		.catch(errors => console.log(errors))
+	})
+
+	document.addEventListener('click', (event) => {
+		if(event.target.closest('.edit-btn')){
+			event.preventDefault();
+
+			const row = event.target.closest('tr')
+			const rowID = row.getAttribute('row-data-id');
+
+			fetch(`/rentals/tenant-detail/${rowID}/`, {
+				method: "GET",
+				headers: {
+					'Content-Type' : 'Application/json'
+				}
+			})
+			.then(response => response.json())
+			.then(tenant => {
+				updateTenantModal.show();
+
+				document.getElementById('tenantID').value = tenant.id;
+				document.getElementById('updateTenantType').value = tenant.tenant_type;
+				document.getElementById('updateTenantName').value = tenant.name;
+				document.getElementById('updateTenantIdNumber').value = tenant.id_no;
+				document.getElementById('updateTenantPhoneNumber').value = tenant.phone_no;
+				document.getElementById('updateTenantEmail').value = tenant.email;
+				document.getElementById('updateTenantOccupation').value = tenant.occupation;
+			})
+		}
+	})
+
+	updateTenantForm.addEventListener('submit', (event) => {
+		event.preventDefault();
+		
+		const tenantID = document.getElementById('tenantID').value;
+		const tenantType = document.getElementById('updateTenantType').value;
+		const tenantName = document.getElementById('updateTenantName').value;
+		const tenantIdNumber = document.getElementById('updateTenantIdNumber').value;
+		const tenantPhoneNumber = document.getElementById('updateTenantPhoneNumber').value;
+		const tenantEmail = document.getElementById('updateTenantEmail').value;
+		const tenantOccupation = document.getElementById('updateTenantOccupation').value;
+
+		const row = document.querySelector(`tr[row-data-id="${tenantID}"]`);
+
+		fetch(`/rentals/tenant-detail/${tenantID}/`, {
+			method: "PATCH",
+			headers: {
+				'Content-Type' : 'Application/json',
+				'X-CSRFToken' : csrfToken
+			},
+			body: JSON.stringify({
+				tenant_type : tenantType,
+				name : tenantName,
+				id_no : tenantIdNumber,
+				phone_no : tenantPhoneNumber,
+				email : tenantEmail,
+				occupation : tenantOccupation
+			})
+		})
+		.then(response => response.json())
+		.then(tenant => {
+			const row_cells = row.cells;
+
+			row_cells[0] = tenant.id
+			row_cells[1] = tenant.name
+			row_cells[2] = tenant.tenant_type
+			row_cells[3] = tenant.phone_no
+			row_cells[4] = format_date(tenant.date_created)
+			row_cells[5] = tenant.active_status ? "Active" : "Inactive"
+
+			updateTenantForm.reset();
+			updateTenantModal.hide();
+		})
+		.catch(errors => console.log(errors))
+		
+	})
+
+	document.addEventListener('click', (event) => {
+		if(event.target.closest('.delete-btn')){
+			event.preventDefault()
+
+			const row = event.target.closest('tr');
+			const rowID = row.getAttribute('row-data-id');
+
+			fetch(`/rentals/tenant-detail/${rowID}/`, {
+				method: "DELETE",
+				headers: {
+					'X-CSRFToken': csrfToken
+				}
+			})
+			.then(response => {response.ok ? row.remove() : console.log("error removing record")})
+		}
+	})
+</script>
+{% endblock %}
