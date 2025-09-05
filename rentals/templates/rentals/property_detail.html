@@ -39,9 +39,23 @@
 			<div class="units-card">
 				<div class="listing-card-header">
 					<h5>Property Units</h5>
-					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPropertyUnitModal">
-						<i class="bi bi-plus"></i> Add Property Unit
-					</button>
+					<div class="card-header-btns">
+						<button class="btn default-btn">Property Leases</button>
+						<div class="btn-group">
+							<button class="btn default-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+								Actions
+							</button>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item" href="#">Reccurent costs</a></li>
+								<li><a class="dropdown-item" href="#">Menu item</a></li>
+								<li><a class="dropdown-item" href="#">Menu item</a></li>
+							</ul>
+						</div>
+						<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPropertyUnitModal">
+							<i class="bi bi-plus"></i> Add Property Unit
+						</button>
+					</div>
+					
 				</div>
 				<table class="table table-sm">
 					<thead>

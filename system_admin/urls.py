@@ -12,4 +12,12 @@ urlpatterns = [
 	path('property-types/', views.property_types, name='property_types'),
 	path('property-type/', views.ListCreatePropertyType.as_view(), name='property_type'),
 	path('property-type-detail/<int:pk>/', views.PropertyTypeDetail.as_view(), name='property_type_detail'),
+	# Deposit categories
+	path('get-deposit-categories/', views.get_deposit_categories, name='get_deposit_categories'),
+	path('deposit-categories/', views.ListCreateDepositCharge.as_view(), name='deposit_categories'),
+	path('deposit-category-detail/<int:pk>/', views.DepositCategoryDetail.as_view(), name='deposit_category_detail'),
+	# Recharge charges
+	path('get-recurrent-charges/', views.get_recurrent_charges, name='get_recurrent_charges'),
+	path('recurrent-charges/', views.ListCreateRecurrentCharge.as_view(), name='recurrent_charges'),
+	path('recurrent-charge-detail/<int:pk>/', views.RecurrentChargeDetail.as_view(), name='recurrent_charge_detail'),
 ]

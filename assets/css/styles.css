@@ -20,6 +20,20 @@
 	font-size: .6em;
 }
 
+.default-btn{
+	background-color: white;
+	color: #000;
+	border: 1px solid #939393;
+	border-radius: .5em;
+}
+
+.default-btn:hover{
+	background-color: white;
+	color: #000;
+	border: 1px solid #939393;
+	border-radius: .5em;
+}
+
 /* Property detail */
 .property-detail-widgets{
 	display: flex;

@@ -20,7 +20,7 @@ class PropertyUnit(BaseModel):
 	vacant_status = models.BooleanField(default=True)
 
 	def __str__(self):
-		return f"{self.name} - {self.property.name}"
+		return f"{self.name} - {self.property.name}" # type: ignore
 	
 class Tenant(BaseModel):
 	tenant_type = models.CharField(max_length=255)
@@ -41,6 +41,6 @@ class PropertyLease(BaseModel):
 	end_date = models.DateField(null=True, blank=True)
 
 	def __str__(self):
-		return f"{self.tenant.name} - {self.property_unit.name} - {self.property_unit.property.name}"
+		return f"{self.tenant.name} - {self.property_unit.name} - {self.property_unit.property.name}" # type: ignore
 
 

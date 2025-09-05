@@ -1,0 +1,237 @@
+{% extends "base.html"%}
+{% block title %}Deposit Categories{% endblock %}
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="listing-card-header">
+					<h5>Deposit Categories</h5>
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDepositCategoryModal">
+						<i class="bi bi-plus"></i> Add Deposit Category
+					</button>
+				</div>
+				<div class="card-body">
+					<table class="table table-sm">
+						<thead>
+							<th>#</th>
+							<th>Name</th>
+							<th>Date created</th>
+							<th>Status</th>
+							<th class="text-center">Action</th>
+						</thead>
+						<tbody id="dataRow"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modals -->
+ <div class="modal fade" id="addDepositCategoryModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Discharge Category Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="addDepositCategoryForm">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="depositCategoryName">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="updateDepositCategoryModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Discharge Category Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="updateDepositCategoryForm">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<input type="hidden" id="depositCategoryID">
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="depositCategoryNameUpdate">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+	const addDepositCategoryModal = new bootstrap.Modal(document.getElementById('addDepositCategoryModal'));
+	const addDepositCategoryForm = document.getElementById('addDepositCategoryForm');
+	const updateDepositCategoryModal = new bootstrap.Modal(document.getElementById('updateDepositCategoryModal'));
+	const updateDepositCategoryForm = document.getElementById('updateDepositCategoryForm');
+	const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+	const dataRow = document.getElementById('dataRow');
+
+	function loadAllDepositCategories() {
+		fetch('/system-admin/deposit-categories/', {
+			method: "GET"
+		})
+		.then(response => response.json())
+		.then(deposit_categories => {
+			dataRow.innerHTML = '';
+
+			deposit_categories.forEach(deposit_category => {
+				const row = document.createElement('tr');
+				row.setAttribute('row-data-id', deposit_category.id);
+				
+				row.innerHTML = `
+					<td>${deposit_category.id}</td>
+					<td>${deposit_category.name}</td>
+					<td>${format_date(deposit_category.date_created)}</td>
+					<td><span class="badge ${deposit_category.active_status ? "text-bg-success" : "text-bg-danger"}">${deposit_category.active_status ? "Active" : "Inactive"}</span></td>
+					<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
+				`;
+				dataRow.appendChild(row);
+			});
+		})
+		.catch(error => console.log(`${error}`));
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		try {
+			loadAllDepositCategories(); // Load tasks on page load
+		} catch {
+			console.log("error.");
+		}
+	});
+
+	addDepositCategoryForm.addEventListener('submit', (event) => {
+		event.preventDefault();
+
+		const deposit_category_name = document.getElementById('depositCategoryName').value;
+		
+		fetch('/system-admin/deposit-categories/', {
+			method: 'POST',
+			headers: {
+				'Content-Type' : 'Application/json',
+				'X-CSRFToken' : csrfToken
+			},
+			body: JSON.stringify({
+				name : deposit_category_name
+			})
+		})
+		.then(response => response.json())
+		.then(deposit_category => {
+			addDepositCategoryForm.reset();
+			addDepositCategoryModal.hide();
+			
+			const row = document.createElement('tr');
+			row.setAttribute('row-data-id', deposit_category.id);
+
+			row.innerHTML = `
+				<td>${deposit_category.id}</td>
+				<td>${deposit_category.name}</td>
+				<td>${format_date(deposit_category.date_created)}</td>
+				<td><span class="badge ${deposit_category.active_status ? "text-bg-success" : "text-bg-danger"}">${deposit_category.active_status ? "Active" : "Inactive"}</span></td>
+				<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
+			`;
+			dataRow.appendChild(row);
+
+		})
+		.catch(errors => console.log(errors))
+	})
+
+	document.addEventListener('click', (event) => {
+		if(event.target.closest('.edit-btn')){
+			event.preventDefault();
+
+			const row = event.target.closest('tr');
+			const rowID = row.getAttribute('row-data-id');
+
+			fetch(`/system-admin/deposit-category-detail/${rowID}/`, {
+				method: "GET",
+				headers: {
+					'Content-Type' : 'Application/json'
+				}
+			})
+			.then(response => response.json())
+			.then(data => {
+				updateDepositCategoryModal.show();
+				let id_field = document.getElementById('depositCategoryID').value = data.id;
+				let input_field = document.getElementById('depositCategoryNameUpdate').value = data.name;
+			})
+		}
+	})
+
+	updateDepositCategoryForm.addEventListener('submit', (event) => {
+		const depositCategoryID = document.getElementById('depositCategoryID').value
+		const depositCategoryName = document.getElementById('depositCategoryNameUpdate').value
+
+		const row = document.querySelector(`tr[row-data-id="${depositCategoryID}"]`);
+
+		fetch(`/system-admin/deposit-category-detail/${depositCategoryID}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type' : 'Application/json',
+				'X-CSRFToken' : csrfToken
+			},
+			body: JSON.stringify({
+				name: depositCategoryName
+			})
+		})
+		.then(response => response.json())
+		.then(deposit_category => {
+			const row_cells = row.cells;
+			row_cells[0].textContent = deposit_category.id;
+			row_cells[0].textContent = deposit_category.name;
+			row_cells[1].textContent = format_date(deposit_category.date_created);
+			row_cells[2].textContent = deposit_category.active_status ? "Active" : "Inactive";
+
+			updateDepositCategoryForm.reset();
+			updateDepositCategoryModal.hide();
+		})
+		.catch(error => console.log(error))
+	})
+
+	document.addEventListener('click', (event) => {
+		if(event.target.closest('.delete-btn')){
+			event.preventDefault();
+
+			const tableRow = event.target.closest('tr');
+			const rowID = tableRow.getAttribute('row-data-id');
+			console.log(`ID: ${rowID}`)
+
+			fetch(`/system-admin/deposit-category-detail/${rowID}/`, {
+				method: 'DELETE',
+				headers: {
+					'X-CSRFToken': csrfToken
+				}
+			})
+			.then(response => {
+				if(response.ok){
+					tableRow.remove();
+				}else{
+					console.log('Error removing item');
+				}
+			})
+			.catch(error => console.log(error))
+		}
+		
+	})
+</script>
+{% endblock %}

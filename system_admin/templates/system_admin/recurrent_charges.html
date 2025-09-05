@@ -1,0 +1,242 @@
+{% extends "base.html"%}
+{% block title %}Recurrent Charges{% endblock %}
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="listing-card-header">
+					<h5>Recurrent Charges</h5>
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRecurrentChargeModal">
+						<i class="bi bi-plus"></i> Add Recurrent Charges
+					</button>
+				</div>
+				<div class="card-body">
+					<table class="table table-sm">
+						<thead>
+							<th>#</th>
+							<th>Name</th>
+							<th>Date created</th>
+							<th>Status</th>
+							<th class="text-center">Action</th>
+						</thead>
+						<tbody id="dataRow"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modals -->
+ <div class="modal fade" id="addRecurrentChargeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Recurrent Charge Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="addRecurrentChargeForm">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="recurrentChargeName">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="updateRecurrentChargeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Recurrent Charge Detail</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+		<form id="updateRecurrentChargeForm">{% csrf_token %}
+			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+			<input type="hidden" id="recurrentChargeID">
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" id="recurrentChargeNameUpdate">
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+	  	</form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+	const addRecurrentChargeModal = new bootstrap.Modal(document.getElementById('addRecurrentChargeModal'));
+	const addRecurrentChargeForm = document.getElementById('addRecurrentChargeForm');
+	const updateRecurrentChargeModal = new bootstrap.Modal(document.getElementById('updateRecurrentChargeModal'));
+	const updateRecurrentChargeForm = document.getElementById('updateRecurrentChargeForm');
+	const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+	const dataRow = document.getElementById('dataRow');
+
+	function loadAllRecurrentCharges() {
+		fetch('/system-admin/recurrent-charges/', {
+			method: "GET"
+		})
+		.then(response => response.json())
+		.then(recurrent_charges => {
+			dataRow.innerHTML = '';
+
+			recurrent_charges.forEach(recurrent_charge => {
+				const row = document.createElement('tr');
+				row.setAttribute('row-data-id', recurrent_charge.id);
+				
+				row.innerHTML = `
+					<td>${recurrent_charge.id}</td>
+					<td>${recurrent_charge.name}</td>
+					<td>${format_date(recurrent_charge.date_created)}</td>
+					<td><span class="badge ${recurrent_charge.active_status ? "text-bg-success" : "text-bg-danger"}">${recurrent_charge.active_status ? "Active" : "Inactive"}</span></td>
+					<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
+				`;
+				dataRow.appendChild(row);
+			});
+		})
+		.catch(error => console.log(`${error}`));
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		try {
+			loadAllRecurrentCharges(); // Load tasks on page load
+		} catch {
+			console.log("error.");
+		}
+	});
+
+	addRecurrentChargeForm.addEventListener('submit', (event) => {
+		event.preventDefault();
+
+		const recurrent_charge_name = document.getElementById('recurrentChargeName').value;
+		
+		fetch('/system-admin/recurrent-charges/', {
+			method: 'POST',
+			headers: {
+				'Content-Type' : 'Application/json',
+				'X-CSRFToken' : csrfToken
+			},
+			body: JSON.stringify({
+				name : recurrent_charge_name
+			})
+		})
+		.then(response => response.json())
+		.then(recurrent_charge => {
+			addRecurrentChargeForm.reset();
+			addRecurrentChargeModal.hide();
+			
+			const row = document.createElement('tr');
+			row.setAttribute('row-data-id', recurrent_charge.id);
+
+			row.innerHTML = `
+				<td>${recurrent_charge.id}</td>
+				<td>${recurrent_charge.name}</td>
+				<td>${format_date(recurrent_charge.date_created)}</td>
+				<td><span class="badge ${recurrent_charge.active_status ? "text-bg-success" : "text-bg-danger"}">${recurrent_charge.active_status ? "Active" : "Inactive"}</span></td>
+				<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-square"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash"></i></a></td>
+			`;
+			dataRow.appendChild(row);
+
+		})
+		.catch(errors => console.log(errors))
+	})
+
+	document.addEventListener('click', (event) => {
+		if(event.target.closest('.edit-btn')){
+			event.preventDefault();
+
+			const row = event.target.closest('tr');
+			const rowID = row.getAttribute('row-data-id');
+
+			fetch(`/system-admin/recurrent-charge-detail/${rowID}/`, {
+				method: "GET",
+				headers: {
+					'Content-Type' : 'Application/json'
+				}
+			})
+			.then(response => response.json())
+			.then(data => {
+				updateRecurrentChargeModal.show();
+				let id_field = document.getElementById('recurrentChargeID').value = data.id;
+				let input_field = document.getElementById('recurrentChargeNameUpdate').value = data.name;
+			})
+		}
+	})
+
+	updateRecurrentChargeForm.addEventListener('submit', (event) => {
+		event.preventDefault();
+
+		const recurrentChargeID = document.getElementById('recurrentChargeID').value;
+		const recurrentChargeName = document.getElementById('recurrentChargeNameUpdate').value;
+
+		const row = document.querySelector(`tr[row-data-id="${recurrentChargeID}"]`);
+
+		fetch(`/system-admin/recurrent-charge-detail/${recurrentChargeID}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRFToken': csrfToken
+			},
+			body: JSON.stringify({ name: recurrentChargeName })
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			return response.json();
+		})
+		.then(recurrent_charge => {
+			const row_cells = row.cells;
+			row_cells[0].textContent = recurrent_charge.id;
+			row_cells[1].textContent = recurrent_charge.name;
+			row_cells[2].textContent = format_date(recurrent_charge.date_created);
+			row_cells[3].textContent = recurrent_charge.active_status ? "Active" : "Inactive";
+
+			updateRecurrentChargeForm.reset();
+			updateRecurrentChargeModal.hide(); // works because it's a Bootstrap Modal instance
+		})
+		.catch(error => console.error("Update failed:", error));
+	});
+
+	document.addEventListener('click', (event) => {
+		if(event.target.closest('.delete-btn')){
+			event.preventDefault();
+
+			const tableRow = event.target.closest('tr');
+			const rowID = tableRow.getAttribute('row-data-id');
+			console.log(`ID: ${rowID}`)
+
+			fetch(`/system-admin/recurrent-charge-detail/${rowID}/`, {
+				method: 'DELETE',
+				headers: {
+					'X-CSRFToken': csrfToken
+				}
+			})
+			.then(response => {
+				if(response.ok){
+					tableRow.remove();
+				}else{
+					console.log('Error removing item');
+				}
+			})
+			.catch(error => console.log(error))
+		}
+		
+	})
+</script>
+{% endblock %}

@@ -34,3 +34,27 @@ class PropertyTypeDetail(RetrieveUpdateDestroyAPIView):
 	queryset = admin_models.PropertyType.objects.select_related('property_category').order_by('name')
 	serializer_class = admin_serializers.PropertyTypeSerializer
 	lookup_field = 'pk'
+
+def get_deposit_categories(request):
+	return render(request, 'system_admin/deposit_categories.html')
+
+class ListCreateDepositCharge(ListCreateAPIView):
+    queryset = admin_models.PropertyDepositCategory.objects.order_by('name')
+    serializer_class = admin_serializers.DepositCategoriesSerializer
+    
+class DepositCategoryDetail(RetrieveUpdateDestroyAPIView):
+	queryset = admin_models.PropertyDepositCategory.objects.order_by('name')
+	serializer_class = admin_serializers.DepositCategoriesSerializer
+	lookup_field = 'pk'
+
+def get_recurrent_charges(request):
+	return render(request, 'system_admin/recurrent_charges.html')
+
+class ListCreateRecurrentCharge(ListCreateAPIView):
+    queryset = admin_models.PropertyReccurentPayment.objects.order_by('name')
+    serializer_class = admin_serializers.RecurrentChargesSerializer
+    
+class RecurrentChargeDetail(RetrieveUpdateDestroyAPIView):
+	queryset = admin_models.PropertyReccurentPayment.objects.order_by('name')
+	serializer_class = admin_serializers.RecurrentChargesSerializer
+	lookup_field = 'pk'
