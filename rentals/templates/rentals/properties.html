@@ -42,7 +42,6 @@
       </div>
       <div class="modal-body">
 		<form id="addPropertyForm" method="POST">{% csrf_token %}
-			<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
 			<div class="form-group">
 				<label>Name</label>
 				<input type="text" class="form-control" id="propertyName">
@@ -96,7 +95,7 @@
 	const dataRow = document.getElementById('dataRow');
 
 	function loadAllProperties() {
-		fetch('/rentals/property-list/', {
+		fetch('/property-list/', {
 			method: "GET"
 		})
 		.then(response => response.json())
@@ -106,7 +105,7 @@
 			properties.forEach(property => {
 				const row = document.createElement('tr');
 				row.setAttribute('row-data-id', property.id);
-				const propertyUrl = `/rentals/get-property-detail/${property.id}/`
+				const propertyUrl = `/get-property-detail/${property.id}/`
 				
 				row.innerHTML = `
 					<td>${property.id}</td>
@@ -125,7 +124,7 @@
 
 	document.addEventListener('DOMContentLoaded', () => {
 		try {
-			loadAllProperties(); // Load tasks on page load
+			loadAllProperties(); // Load properties on page load
 		} catch {
 			console.log("error.");
 		}
@@ -139,10 +138,10 @@
 		const property_county = document.getElementById('propertyCounty').value;
 		const property_physical_location = document.getElementById('propertyPhysicalLocation').value;
 		
-		fetch('/rentals/property-list/', {
+		fetch('/property-list/', {
 			method: 'POST',
 			headers: {
-				'Content-Type' : 'Application/json',
+				'Content-Type' : 'application/json',
 				'X-CSRFToken' : csrfToken
 			},
 			body: JSON.stringify({
@@ -160,7 +159,7 @@
 			const row = document.createElement('tr');
 			row.setAttribute('row-data-id', property.id);
 
-			const propertyUrl = `/rentals/get-property-detail/${property.id}/`
+			const propertyUrl = `/get-property-detail/${property.id}/`
 
 			row.innerHTML = `
 				<td>${property.id}</td>
@@ -171,7 +170,7 @@
 				<td><span class="badge ${property.active_status ? "text-bg-success" : "text-bg-danger"}">${property.active_status ? "Active" : "Inactive"}</span></td>
 				<td class="text-center"><a href="#" class="edit-btn"><i class="bi bi-pencil-fill"></i></a> | <a href="#" class="delete-btn"><i class="bi bi-trash-fill"></i></a></td>
 			`;
-			dataRow.appendChild(row);
+			dataRow.prepend(row);
 
 		})
 		.catch(errors => console.log(errors))

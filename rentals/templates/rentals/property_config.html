@@ -1,0 +1,92 @@
+{% extends "base.html"%}
+{% block title %}Property Configuration{% endblock %}
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-4">
+			<div class="card config-card">
+				<div class="listing-card-header">
+					<h5>Property Detail</h5>
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updatePropertyDetailModal">
+						<i class="bi bi-edit"></i> Update Property
+					</button>
+				</div>
+				<div class="card-body" id="propertyDetail" data-row-id="{{property_detail.pk}}">
+					<form id="updatePropertyDetail">
+						<div class="form-group">
+							<label>Name</label>
+							<input type="text" class="form-control" id="propertyName" value="{{property_detail.name}}">
+						</div>
+						<div class="form-group">
+							<label>Property type</label>
+							<input type="text" class="form-control" id="propertyType" value="{{property_detail.property_type.pk}} - {{property_detail.property_type.name}}">
+						</div>
+						<div class="form-group">
+							<label>County</label>
+							<input type="text" class="form-control" id="propertyCounty" value="{{property_detail.county}}">
+						</div>
+						<div class="form-group">
+							<label>Physical location</label>
+							<input type="text" class="form-control" id="propertyPhysicalLocation" value="{{property_detail.physical_location}}">
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card config-card">
+				<div class="listing-card-header">
+					<h5>Lease Deposits</h5>
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLeaseDepositModal">
+						<i class="bi bi-plus"></i> Lease Deposit
+					</button>
+				</div>
+				<div class="card-body">
+					<table class="table table-sm">
+						<thead>
+							<th>#</th>
+							<th>Name</th>
+							<th>Date created</th>
+							<th>Status</th>
+							<th class="text-center">Action</th>
+						</thead>
+						<tbody id="leaseDepositsDataRow"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card config-card">
+				<div class="listing-card-header">
+					<h5>Recurrent Charges</h5>
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRecurrentChargeModal">
+						<i class="bi bi-plus"></i> Recurrent Charge
+					</button>
+				</div>
+				<div class="card-body">
+					<table class="table table-sm">
+						<thead>
+							<th>#</th>
+							<th>Name</th>
+							<th>Date created</th>
+							<th>Status</th>
+							<th class="text-center">Action</th>
+						</thead>
+						<tbody id="recurrentChargesDataRow"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+	const propertyDetail = document.getElementById('propertyDetail')
+
+	funtion getPropertyDetail(){
+
+	}
+</script>
+{% endblock %}

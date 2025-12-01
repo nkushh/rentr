@@ -1,6 +1,6 @@
 from django.db.models import Count, Q
 from django.shortcuts import render
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 # Models
@@ -64,6 +64,17 @@ class PropertyUnitDetail(RetrieveUpdateDestroyAPIView):
 	queryset = rental_models.PropertyUnit.objects.order_by('name')
 	serializer_class = rental_serializers.PropertyUnitSerializer
 	lookup_field = 'pk'
+
+class PropertyConfigView(RetrieveAPIView):
+	queryset = rental_models.Property.objects.all()
+	renderer_classes = [TemplateHTMLRenderer]
+	template_name = 'rentals/property_config.html'
+	lookup_field = 'pk'
+
+	def retrieve(self, request, *args, **kwargs):
+		instance = self.get_object()
+		return Response({'property_detail' : instance})
+
 
 def get_tenants(request):
 	return render(request, 'rentals/tenants.html')

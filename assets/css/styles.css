@@ -53,13 +53,50 @@
 .blue-widget{
 	background-color: blue;
 	color: #fff;
-	line-height: .5;
+	line-height: 1;
 	border: 1px solid #3c3cf0;;
 	font-size: .8em;
+}
+
+.widget-data{
+	font-size: 2em;
 }
 
 .units-card{
 	border: 1px solid #eee;
 	border-radius: .5em;
 	padding: 1em 0;
+}
+
+/* Property config */
+.config-card{
+	min-height: 30em;
+}
+
+@media (max-width: 768px){
+	.table{
+		font-size: .8em;
+	}
+
+	.property-detail-widget{
+		margin: .5em auto;
+	}
+
+	.property-detail-widget h5{
+		font-size: medium;
+	}
+
+	.listing-card-header {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.card-header-btns{
+		display: flex;
+	}
+
+	.listing-card-header button{
+		font-size: .8em;
+		margin: auto 1em;
+	}
 }
